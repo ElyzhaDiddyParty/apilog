@@ -42,7 +42,6 @@ app.get('/deviceAuth', async (req, res) => {
     try {
         const key = generateRandomKey();
 
-        // Get initial access token
         const tokenResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', qs.stringify({
             grant_type: 'client_credentials'
         }), {
@@ -54,27 +53,26 @@ app.get('/deviceAuth', async (req, res) => {
 
         const accessToken = tokenResponse.data.access_token;
 
-        // Device authorization request
         const deviceAuthResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/deviceAuthorization', {
             prompt: 'login'
         }, {
             headers: {
-                'Authorization': `Bearer ${accessToken}`,
+                'Authorization': Bearer ${accessToken},
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
 
         const { device_code, user_code } = deviceAuthResponse.data;
+
         authorizedUsers[key] = { status: 'pending' };
 
         res.json({
             message: 'Please log in using the following link and user code',
-            link: `https://www.epicgames.com/id/activate?userCode=${user_code}`,
-            refresh_link: `https://${process.env.HOST}/getDeviceInfo?key=${key}`,
+            link: https://www.epicgames.com/id/activate?userCode=${user_code},
+            refresh_link: https://${process.env.HOST}/getDeviceInfo?key=${key}, // Updated to HTTPS
             user_code: user_code.toString()
         });
 
-        // Polling for login status
         let pollInterval = setInterval(async () => {
             try {
                 const pollResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', qs.stringify({
@@ -93,8 +91,8 @@ app.get('/deviceAuth', async (req, res) => {
                     const loggedInData = pollResponse.data;
                     const accountId = loggedInData.account_id;
 
-                    const exchangeResponse = await axios.post(`https://account-public-service-prod.ol.epicgames.com/account/api/public/account/${accountId}/deviceAuth`, {}, {
-                        headers: { Authorization: `Bearer ${loggedInData.access_token}`, 'Content-Type': 'application/json' }
+                    const exchangeResponse = await axios.post(https://account-public-service-prod.ol.epicgames.com/account/api/public/account/${accountId}/deviceAuth, {}, {
+                        headers: { Authorization: Bearer ${loggedInData.access_token}, 'Content-Type': 'application/json' }
                     });
 
                     const { deviceId, secret } = exchangeResponse.data;
@@ -107,14 +105,13 @@ app.get('/deviceAuth', async (req, res) => {
                         display_name: loggedInData.displayName
                     };
 
-                    console.log(`User ${accountId} authorized successfully.`);
+                    console.log(User ${accountId} authorized successfully.);
 
-                    // Only send response to the main menu after we have complete data
                     if (!res.headersSent) {
                         res.json({
                             success: true,
                             message: 'Authorization successful. You can now get your device info using the refresh link.',
-                            refresh_link: `https://${process.env.HOST}/getDeviceInfo?key=${key}`
+                            refresh_link: https://${process.env.HOST}/getDeviceInfo?key=${key} // Updated to HTTPS
                         });
                     }
                 }
@@ -129,7 +126,7 @@ app.get('/deviceAuth', async (req, res) => {
                     }
                 }
             }
-        }, 1000); // Poll every 10 seconds
+        }, 1000);
     } catch (error) {
         console.error('Error:', error.response ? error.response.data : error);
         if (!res.headersSent) {
@@ -147,8 +144,7 @@ app.get('/getDeviceInfo', (req, res) => {
 
     const userInfo = authorizedUsers[key];
 
-    // Wait for the user info to be available and not pending
-    if (userInfo && userInfo.access_token) {
+    if (userInfo) {
         res.json({ success: true, data: userInfo });
     } else {
         res.status(404).json({ success: false, message: 'User not found or not authorized yet.' });
@@ -156,5 +152,5 @@ app.get('/getDeviceInfo', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on https://${process.env.HOST}:${PORT}`); // Ensure HTTPS is indicated
+    console.log(Server is running on https://${process.env.HOST}:${PORT}); // Ensure HTTPS is indicated
 });
