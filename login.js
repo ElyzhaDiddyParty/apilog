@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const qs = require('qs');
-const cors = require('cors');
+const cors = require('cors'); // Import cors
 require('dotenv').config();
 
 const app = express();
@@ -11,10 +11,10 @@ let authorizedUsers = {};
 
 const generateRandomKey = () => Math.random().toString(36).substring(2, 10);
 
-// CORS middleware to allow requests from your front-end origin
+// Use CORS middleware to allow requests from your front-end origin
 app.use(cors({
-    origin: 'https://fortnite-spoofer.netlify.app',
-    methods: ['GET', 'POST'],
+    origin: 'https://fortnite-spoofer.netlify.app', // Allow requests from this origin
+    methods: ['GET', 'POST'], // Allow specific HTTP methods
     credentials: true // If you need to send cookies or authorization headers
 }));
 
@@ -41,7 +41,7 @@ const getAccessTokenFromDevice = async (accountId, deviceId, secret) => {
 app.get('/deviceAuth', async (req, res) => {
     try {
         const key = generateRandomKey();
-        
+
         // Get initial access token
         const tokenResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', qs.stringify({
             grant_type: 'client_credentials'
@@ -109,6 +109,7 @@ app.get('/deviceAuth', async (req, res) => {
 
                     console.log(`User ${accountId} authorized successfully.`);
 
+                    // Only send response to the main menu after we have complete data
                     if (!res.headersSent) {
                         res.json({
                             success: true,
@@ -128,7 +129,7 @@ app.get('/deviceAuth', async (req, res) => {
                     }
                 }
             }
-        }, 10000); // Poll every 10 seconds
+        }, 1000); // Poll every 10 seconds
     } catch (error) {
         console.error('Error:', error.response ? error.response.data : error);
         if (!res.headersSent) {
@@ -146,7 +147,8 @@ app.get('/getDeviceInfo', (req, res) => {
 
     const userInfo = authorizedUsers[key];
 
-    if (userInfo) {
+    // Wait for the user info to be available and not pending
+    if (userInfo && userInfo.access_token) {
         res.json({ success: true, data: userInfo });
     } else {
         res.status(404).json({ success: false, message: 'User not found or not authorized yet.' });
@@ -154,5 +156,5 @@ app.get('/getDeviceInfo', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on https://${process.env.HOST}:${PORT}`);
+    console.log(`Server is running on https://${process.env.HOST}:${PORT}`); // Ensure HTTPS is indicated
 });
