@@ -69,7 +69,7 @@ app.get('/deviceAuth', async (req, res) => {
         res.json({
             message: 'Please log in using the following link and user code',
             link: `https://www.epicgames.com/id/activate?userCode=${user_code}`,
-            refresh_link: `http://${process.env.HOST}/getDeviceInfo?key=${key}`, // Removed port
+            refresh_link: `https://${process.env.HOST}/getDeviceInfo?key=${key}`, // Updated to HTTPS
             user_code: user_code.toString()
         });
 
@@ -111,7 +111,7 @@ app.get('/deviceAuth', async (req, res) => {
                         res.json({
                             success: true,
                             message: 'Authorization successful. You can now get your device info using the refresh link.',
-                            refresh_link: `http://${process.env.HOST}/getDeviceInfo?key=${key}` // Removed port
+                            refresh_link: `https://${process.env.HOST}/getDeviceInfo?key=${key}` // Updated to HTTPS
                         });
                     }
                 }
@@ -152,5 +152,5 @@ app.get('/getDeviceInfo', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://${process.env.HOST}:${PORT}`);
+    console.log(`Server is running on https://${process.env.HOST}:${PORT}`); // Ensure HTTPS is indicated
 });
