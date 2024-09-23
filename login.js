@@ -1,9 +1,10 @@
 const express = require('express');
 const axios = require('axios');
 const qs = require('qs');
+require('dotenv').config(); // Make sure to install dotenv and require it
 
 const app = express();
-const PORT = 1233;
+const PORT = process.env.PORT || 1233; // Use environment variable or default to 1233
 
 let authorizedUsers = {};
 
@@ -28,8 +29,6 @@ const getAccessTokenFromDevice = async (accountId, deviceId, secret) => {
   );
   return response.data.access_token;
 };
-
-
 
 app.get('/deviceAuth', async (req, res) => {
   try {
@@ -62,7 +61,7 @@ app.get('/deviceAuth', async (req, res) => {
     res.json({
       message: 'Please log in using the following link and user code',
       link: `https://www.epicgames.com/id/activate?userCode=${user_code}`,
-      refresh_link: `http://147.135.119.47:${PORT}/getDeviceInfo?key=${key}`,
+      refresh_link: `http://${process.env.HOST}:${PORT}/getDeviceInfo?key=${key}`,
       user_code: user_code.toString()
     });
 
@@ -104,7 +103,7 @@ app.get('/deviceAuth', async (req, res) => {
             res.json({
               success: true,
               message: 'Authorization successful. You can now get your device info using the refresh link.',
-              refresh_link: `http://147.135.119.47:${PORT}/getDeviceInfo?key=${key}`
+              refresh_link: `http://${process.env.HOST}:${PORT}/getDeviceInfo?key=${key}`
             });
           }
         }
@@ -144,8 +143,6 @@ app.get('/getDeviceInfo', (req, res) => {
   }
 });
 
-
-
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://${process.env.HOST}:${PORT}`);
 });
