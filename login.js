@@ -1,6 +1,5 @@
 const express = require('express');
 const axios = require('axios');
-const qs = require('qs');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -43,7 +42,7 @@ const getAccessTokenFromDevice = async (accountId, deviceId, secret) => {
 app.get('/deviceAuth', async (req, res) => {
     try {
         const key = generateRandomKey();
-        const tokenResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', qs.stringify({
+        const tokenResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', new URLSearchParams({
             grant_type: 'client_credentials'
         }), {
             headers: {
@@ -75,7 +74,7 @@ app.get('/deviceAuth', async (req, res) => {
 
         let pollInterval = setInterval(async () => {
             try {
-                const pollResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', qs.stringify({
+                const pollResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', new URLSearchParams({
                     grant_type: 'device_code',
                     device_code,
                     token_type: 'eg1'
@@ -226,21 +225,3 @@ app.post('/api/spoof-level', async (req, res) => {
             }, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            res.json({ success: true, message: 'Level spoofed successfully!' });
-        } else {
-            res.status(404).json({ success: false, message: 'Member not found in party.' });
-        }
-    } catch (error) {
-        console.error('Error spoofing level:', error);
-        res.status(500).json({ success: false, message: 'Error spoofing level.' });
-    }
-});
-
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
