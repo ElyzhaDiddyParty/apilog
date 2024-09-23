@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const qs = require('qs');
-const cors = require('cors');
+const cors = require('cors'); // Import cors
 require('dotenv').config();
 
 const app = express();
@@ -13,9 +13,9 @@ const generateRandomKey = () => Math.random().toString(36).substring(2, 10);
 
 // Use CORS middleware to allow requests from your front-end origin
 app.use(cors({
-    origin: 'https://fortnite-spoofer.netlify.app',
-    methods: ['GET', 'POST'],
-    credentials: true
+    origin: 'https://fortnite-spoofer.netlify.app', // Allow requests from this origin
+    methods: ['GET', 'POST'], // Allow specific HTTP methods
+    credentials: true // If you need to send cookies or authorization headers
 }));
 
 const getAccessTokenFromDevice = async (accountId, deviceId, secret) => {
@@ -69,7 +69,7 @@ app.get('/deviceAuth', async (req, res) => {
         res.json({
             message: 'Please log in using the following link and user code',
             link: `https://www.epicgames.com/id/activate?userCode=${user_code}`,
-            refresh_link: `http://${process.env.HOST}:${PORT}/getDeviceInfo?key=${key}`, // Use HTTP and correct port
+            refresh_link: `http://${process.env.HOST}/getDeviceInfo?key=${key}`, // Removed port
             user_code: user_code.toString()
         });
 
@@ -111,7 +111,7 @@ app.get('/deviceAuth', async (req, res) => {
                         res.json({
                             success: true,
                             message: 'Authorization successful. You can now get your device info using the refresh link.',
-                            refresh_link: `http://${process.env.HOST}:${PORT}/getDeviceInfo?key=${key}` // Use HTTP and correct port
+                            refresh_link: `http://${process.env.HOST}/getDeviceInfo?key=${key}` // Removed port
                         });
                     }
                 }
