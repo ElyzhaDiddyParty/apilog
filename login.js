@@ -128,7 +128,7 @@ app.get('/deviceAuth', async (req, res) => {
                     }
                 }
             }
-        }, 1000); // Poll every 10 seconds
+        }, 1000); // Poll every second
     } catch (error) {
         console.error('Error:', error.response ? error.response.data : error);
         if (!res.headersSent) {
@@ -153,6 +153,95 @@ app.get('/getDeviceInfo', (req, res) => {
     }
 });
 
+// New endpoint to change skin
+app.post('/api/change-skin', async (req, res) => {
+    const { accountId, accessToken, skinId } = req.body;
+
+    try {
+        const response = await axios.get(`https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/user/${accountId}`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const partyData = response.data;
+
+        const partyId = partyData.current[0].id;
+        const member = partyData.current[0].members.find(m => m.account_id === accountId);
+
+        if (member) {
+            const currentRevision = member.revision;
+            const updateObject = {
+                'Default:AthenaCosmeticLoadout_j': JSON.stringify({
+                    'AthenaCosmeticLoadout': {
+                        'characterPrimaryAssetId': 'AthenaCharacter:' + skinId,
+                        'scratchpad': []
+                    }
+                })
+            };
+
+            await axios.patch(`https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/parties/${partyId}/members/${accountId}/meta`, {
+                delete: [],
+                revision: currentRevision,
+                update: updateObject
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            res.json({ success: true, message: 'Skin changed successfully!' });
+        } else {
+            res.status(404).json({ success: false, message: 'Member not found in party.' });
+        }
+    } catch (error) {
+        console.error('Error changing skin:', error);
+        res.status(500).json({ success: false, message: 'Error changing skin.' });
+    }
+});
+
+// New endpoint to spoof level
+app.post('/api/spoof-level', async (req, res) => {
+    const { accountId, accessToken, levelAmount } = req.body;
+
+    try {
+        const response = await axios.get(`https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/user/${accountId}`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const partyData = response.data;
+
+        const partyId = partyData.current[0].id;
+        const member = partyData.current[0].members.find(m => m.account_id === accountId);
+
+        if (member) {
+            const currentRevision = member.revision;
+            const cosmeticUpdate = {
+                'Default:AthenaBannerInfo_j': JSON.stringify({
+                    'AthenaBannerInfo': {
+                        'seasonLevel': parseInt(levelAmount)
+                    }
+                })
+            };
+
+            await axios.patch(`https://party-service-prod.ol.epicgames.com/party/api/v1/Fortnite/parties/${partyId}/members/${accountId}/meta`, {
+                delete: [],
+                revision: currentRevision,
+                update: cosmeticUpdate
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            res.json({ success: true, message: 'Level spoofed successfully!' });
+        } else {
+            res.status(404).json({ success: false, message: 'Member not found in party.' });
+        }
+    } catch (error) {
+        console.error('Error spoofing level:', error);
+        res.status(500).json({ success: false, message: 'Error spoofing level.' });
+    }
+});
+
 app.listen(PORT, () => {
-    console.log(`Server is running on https://${process.env.HOST}:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
