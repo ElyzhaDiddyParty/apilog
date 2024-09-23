@@ -15,8 +15,10 @@ const generateRandomKey = () => Math.random().toString(36).substring(2, 10);
 app.use(cors({
     origin: 'https://fortnite-spoofer.netlify.app',
     methods: ['GET', 'POST'],
-    credentials: true // If you need to send cookies or authorization headers
+    credentials: true
 }));
+
+app.use(express.json()); // Parse JSON bodies
 
 const getAccessTokenFromDevice = async (accountId, deviceId, secret) => {
     const response = await axios.post(
@@ -41,8 +43,6 @@ const getAccessTokenFromDevice = async (accountId, deviceId, secret) => {
 app.get('/deviceAuth', async (req, res) => {
     try {
         const key = generateRandomKey();
-        
-        // Get initial access token
         const tokenResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', qs.stringify({
             grant_type: 'client_credentials'
         }), {
@@ -54,7 +54,6 @@ app.get('/deviceAuth', async (req, res) => {
 
         const accessToken = tokenResponse.data.access_token;
 
-        // Device authorization request
         const deviceAuthResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/deviceAuthorization', {
             prompt: 'login'
         }, {
@@ -74,7 +73,6 @@ app.get('/deviceAuth', async (req, res) => {
             user_code: user_code.toString()
         });
 
-        // Polling for login status
         let pollInterval = setInterval(async () => {
             try {
                 const pollResponse = await axios.post('https://account-public-service-prod.ol.epicgames.com/account/api/oauth/token', qs.stringify({
@@ -242,6 +240,7 @@ app.post('/api/spoof-level', async (req, res) => {
     }
 });
 
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
