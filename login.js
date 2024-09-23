@@ -196,6 +196,7 @@ app.post('/api/change-skin', async (req, res) => {
 });
 
 // New endpoint to spoof level
+// New endpoint to spoof level
 app.post('/api/spoof-level', async (req, res) => {
     const { accountId, accessToken, levelAmount } = req.body;
 
@@ -225,3 +226,21 @@ app.post('/api/spoof-level', async (req, res) => {
             }, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            res.json({ success: true, message: 'Level spoofed successfully!' });
+        } else {
+            res.status(404).json({ success: false, message: 'Member not found in party.' });
+        }
+    } catch (error) {
+        console.error('Error spoofing level:', error);
+        res.status(500).json({ success: false, message: 'Error spoofing level.' });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
