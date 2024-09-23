@@ -14,7 +14,7 @@
     "dotenv": "^10.0.0"
   },
   "engines": {
-    "node": "14.x" // or your preferred version
+    "node": "14.x"
   },
   "license": "ISC"
 }
