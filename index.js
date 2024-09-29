@@ -4,7 +4,7 @@ const qs = require('qs');
 const path = require('path');
 
 const app = express();
-const PORT = 1233;
+const PORT = process.env.PORT || 1233;
 
 let authorizedUsers = {};
 
@@ -30,6 +30,8 @@ const getAccessTokenFromDevice = async (accountId, deviceId, secret) => {
   return response.data.access_token;
 };
 
+app.use(express.static(path.join(__dirname))); // Serve static files from the current directory
+
 app.get('/deviceAuth', async (req, res) => {
   try {
     const key = generateRandomKey();
@@ -54,14 +56,14 @@ app.get('/deviceAuth', async (req, res) => {
       }
     });
 
-    const { device_code, verification_uri, user_code } = deviceAuthResponse.data;
+    const { device_code, user_code } = deviceAuthResponse.data;
 
     authorizedUsers[key] = { status: 'pending' };
 
     res.json({
       message: 'Please log in using the following link and user code',
       link: `https://www.epicgames.com/id/activate?userCode=${user_code}`,
-      refresh_link: `https://apilog-7re1.onrender.com:${PORT}/getDeviceInfo?key=${key}`,
+      refresh_link: `http://localhost:${PORT}/getDeviceInfo?key=${key}`,
       user_code: user_code.toString()
     });
 
@@ -103,7 +105,7 @@ app.get('/deviceAuth', async (req, res) => {
             res.json({
               success: true,
               message: 'Authorization successful. You can now get your device info using the refresh link.',
-              refresh_link: `https://apilog-7re1.onrender.com:${PORT}/getDeviceInfo?key=${key}`
+              refresh_link: `http://localhost:${PORT}/getDeviceInfo?key=${key}`
             });
           }
         }
