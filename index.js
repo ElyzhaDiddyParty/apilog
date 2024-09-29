@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const qs = require('qs');
+const path = require('path');
 
 const app = express();
 const PORT = 1233;
@@ -28,8 +29,6 @@ const getAccessTokenFromDevice = async (accountId, deviceId, secret) => {
   );
   return response.data.access_token;
 };
-
-
 
 app.get('/deviceAuth', async (req, res) => {
   try {
@@ -62,7 +61,7 @@ app.get('/deviceAuth', async (req, res) => {
     res.json({
       message: 'Please log in using the following link and user code',
       link: `https://www.epicgames.com/id/activate?userCode=${user_code}`,
-      refresh_link: `http://147.135.119.47:${PORT}/getDeviceInfo?key=${key}`,
+      refresh_link: `https://apilog-7re1.onrender.com:${PORT}/getDeviceInfo?key=${key}`,
       user_code: user_code.toString()
     });
 
@@ -104,7 +103,7 @@ app.get('/deviceAuth', async (req, res) => {
             res.json({
               success: true,
               message: 'Authorization successful. You can now get your device info using the refresh link.',
-              refresh_link: `http://147.135.119.47:${PORT}/getDeviceInfo?key=${key}`
+              refresh_link: `https://apilog-7re1.onrender.com:${PORT}/getDeviceInfo?key=${key}`
             });
           }
         }
@@ -144,7 +143,22 @@ app.get('/getDeviceInfo', (req, res) => {
   }
 });
 
-
+// Endpoint to ping the specified URL
+app.get('/ping', async (req, res) => {
+  try {
+    const response = await axios.get('https://apilog-7re1.onrender.com');
+    res.json({
+      success: true,
+      data: response.data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error pinging the URL.',
+      error: error.message,
+    });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
