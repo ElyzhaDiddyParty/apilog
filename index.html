@@ -4,24 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ping Service</title>
-    <script src="index.js" defer></script>
+    <script>
+        async function pingAPI() {
+            try {
+                const response = await fetch('/ping');
+                const data = await response.json();
+                document.getElementById('response').innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('response').innerText = 'Error: ' + error.message;
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>Ping Service</h1>
-    <button id="pingButton">Ping API</button>
-    <div id="response"></div>
-
-    <script>
-        document.getElementById('pingButton').onclick = () => {
-            fetch('/ping')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('response').innerText = JSON.stringify(data, null, 2);
-                })
-                .catch(error => {
-                    document.getElementById('response').innerText = 'Error: ' + error.message;
-                });
-        };
-    </script>
+    <button id="pingButton" onclick="pingAPI()">Ping API</button>
+    <pre id="response"></pre>
 </body>
 </html>
