@@ -14,6 +14,12 @@
                 document.getElementById('response').innerText = 'Error: ' + error.message;
             }
         }
+
+        // Call pingAPI every 5 minutes (300,000 milliseconds)
+        setInterval(pingAPI, 300000); // 300000 ms = 5 minutes
+
+        // Optional: Initial call to pingAPI when the page loads
+        window.onload = pingAPI;
     </script>
 </head>
 <body>
